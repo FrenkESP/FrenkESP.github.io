@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Servo Control</title>
+  <title>ESP32 Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="text-align:center; font-family:sans-serif;">
 
-<h1>Servo Control</h1>
+<body style="text-align:center; font-family:sans-serif; background:#111; color:white;">
 
-<button onclick="sendPush()" style="font-size:30px; padding:20px;">
-  DUW
+<h1>ESP32 Control</h1>
+
+<!-- 🔋 BATTERIJ -->
+<div style="margin:20px;">
+  <div id="batteryIcon" style="font-size:50px;">🔋</div>
+  <div id="batteryText">--%</div>
+  <div id="chargingText">⚡ Niet aan het laden</div>
+</div>
+
+<!-- 🔘 GROTE KNOP -->
+<button onclick="sendPush()" 
+style="font-size:40px; padding:40px; border-radius:20px; background:#00ff88; border:none;">
+  PUSH
 </button>
 
 <p id="status">Niet verbonden</p>
@@ -16,27 +27,37 @@
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <script>
-const client = mqtt.connect("wss://44833a5307f64bb49c6ed32f569dbbb9.s1.eu.hivemq.cloud:8884/mqtt", {
-  username: "Frenk",
-  password: "ButtonPusherPS5"
+const client = mqtt.connect("wss://xxxx.s1.eu.hivemq.cloud:8884/mqtt", {
+  username: "frenk",
+  password: "123456"
 });
 
 client.on("connect", () => {
-  console.log("CONNECTED");
   document.getElementById("status").innerText = "Verbonden!";
+  
+  // subscribe batterij
+  client.subscribe("esp32/battery123");
+  client.subscribe("esp32/charging123");
 });
 
-client.on("error", (err) => {
-  console.log("ERROR:", err);
-  document.getElementById("status").innerText = "Error!";
+client.on("message", (topic, message) => {
+  const msg = message.toString();
+
+  if (topic === "esp32/battery123") {
+    document.getElementById("batteryText").innerText = msg + "%";
+  }
+
+  if (topic === "esp32/charging123") {
+    if (msg === "charging") {
+      document.getElementById("chargingText").innerText = "⚡ Opladen";
+    } else {
+      document.getElementById("chargingText").innerText = "🔋 Niet aan het laden";
+    }
+  }
 });
 
 function sendPush() {
-  console.log("BUTTON CLICKED");
-
   client.publish("esp32/servo123abc", "push");
-
-  console.log("MESSAGE SENT");
 }
 </script>
 
