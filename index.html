@@ -22,11 +22,21 @@ const client = mqtt.connect("wss://44833a5307f64bb49c6ed32f569dbbb9.s1.eu.hivemq
 });
 
 client.on("connect", () => {
+  console.log("CONNECTED");
   document.getElementById("status").innerText = "Verbonden!";
 });
 
+client.on("error", (err) => {
+  console.log("ERROR:", err);
+  document.getElementById("status").innerText = "Error!";
+});
+
 function sendPush() {
+  console.log("BUTTON CLICKED");
+
   client.publish("esp32/servo123abc", "push");
+
+  console.log("MESSAGE SENT");
 }
 </script>
 
